@@ -1,0 +1,34 @@
+import pandas as pd
+
+# Load dataset
+df = pd.read_csv('medical_appointments.csv')
+
+# 1. Standardize column names
+df.columns = df.columns.str.strip().str.lower().str.replace('-', '_')
+
+# 2. Handle missing values
+print("Missing Values:\n", df.isnull().sum())
+# (In this dataset, there are usually no missing values, but if there are:)
+# Fill missing 'neighbourhood' if needed
+df['neighbourhood'].fillna(method='ffill', inplace=True)
+
+# 3. Remove duplicates
+df.drop_duplicates(inplace=True)
+
+# 4. Standardize text values
+df['gender'] = df['gender'].str.upper()
+df['no_show'] = df['no_show'].map({'No': 0, 'Yes': 1})
+
+# 5. Fix data types
+df['scheduledday'] = pd.to_datetime(df['scheduledday'])
+df['appointmentday'] = pd.to_datetime(df['appointmentday'])
+df['age'] = df['age'].astype(int)
+
+# 6. Remove invalid values
+df = df[df['age'] >= 0]  # Remove negative ages
+
+# 7. Final check
+print(df.info())
+
+# Save cleaned data
+df.to_csv('medical_appointments_cleaned.csv', index=False)
