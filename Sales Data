@@ -1,0 +1,31 @@
+import pandas as pd
+
+# Load raw sales data
+df = pd.read_csv('sales_data.csv')
+
+# 1. Drop completely empty rows
+df.dropna(how='all', inplace=True)
+
+# 2. Handle missing values (drop rows with missing Quantity or Price)
+df.dropna(subset=['Quantity Ordered', 'Price Each'], inplace=True)
+
+# 3. Remove duplicates
+df.drop_duplicates(inplace=True)
+
+# 4. Standardize column names
+df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+
+# 5. Convert data types
+df['quantity_ordered'] = df['quantity_ordered'].astype(int)
+df['price_each'] = df['price_each'].astype(float)
+
+# 6. Convert 'order_date' to datetime
+df['order_date'] = pd.to_datetime(df['order_date'], errors='coerce')
+df.dropna(subset=['order_date'], inplace=True)
+
+# 7. Create new columns (optional but useful)
+df['sales'] = df['quantity_ordered'] * df['price_each']
+df['month'] = df['order_date'].dt.month
+
+# Save the cleaned data
+df.to_csv('sales_data_cleaned.csv', index=False)
