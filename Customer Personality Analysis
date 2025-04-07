@@ -1,0 +1,40 @@
+import pandas as pd
+
+# Load the dataset
+df = pd.read_csv('Customer_Personality_Analysis.csv')
+
+# 1. Standardize column names
+df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+
+# 2. Handle missing values
+print(df.isnull().sum())
+# Fill missing income with median
+df['income'] = df['income'].fillna(df['income'].median())
+
+# 3. Remove duplicates
+df.drop_duplicates(inplace=True)
+
+# 4. Standardize categorical text values
+df['education'] = df['education'].str.title()
+df['marital_status'] = df['marital_status'].replace({
+    'Alone': 'Single', 'Absurd': 'Single', 'YOLO': 'Single'
+})
+
+# 5. Convert Dt_Customer to datetime format
+df['dt_customer'] = pd.to_datetime(df['dt_customer'])
+
+# 6. Remove outliers
+df = df[df['income'] < 600000]  # Example condition
+df = df[df['year_birth'] > 1900]  # Remove birth years like 1899 etc.
+
+# 7. Fix data types
+df['income'] = df['income'].astype(float)
+df['kidhome'] = df['kidhome'].astype(int)
+df['teenhome'] = df['teenhome'].astype(int)
+
+# 8. Feature Engineering (optional): Create 'total_children' and 'customer_age'
+df['total_children'] = df['kidhome'] + df['teenhome']
+df['customer_age'] = 2025 - df['year_birth']
+
+# Save cleaned dataset
+df.to_csv('customer_personality_cleaned.csv', index=False)
